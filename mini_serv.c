@@ -18,6 +18,7 @@ int clientSocket[MAX_CLIENT];
 int next_id = 0;
 fd_set readyRead, readyWrite, activeSocket;
 
+
 int extract_message(char **buf, char **msg)
 {
 	char	*newbuf;
@@ -67,14 +68,14 @@ char *str_join(char *buf, char *add)
 
 void sendAll(int except)
 {
-	for(int i = 0; i <= maxSocket; i ++)
+	for (int i = 0; i <= maxSocket; i++)
 		if(i != except && FD_ISSET(i, &readyWrite))
 			send(i, outbuf, strlen(outbuf), 0);
 }
 
-void err(char *str)
+void err(char *msg)
 {
-	write(2, str, strlen(str));
+	write(2, msg, strlen(msg));
 	write(2, "\n", 1);
 	exit(1);
 }
@@ -84,7 +85,7 @@ int main(int argc, char **argv)
 	int sockfd, connfd;
 	struct sockaddr_in servaddr;
 
-	if (argc != 2)
+	if(argc != 2)
 		err("Wrong number of arguments");
 
 	// socket create and verification
@@ -115,15 +116,15 @@ int main(int argc, char **argv)
 		readyRead = readyWrite = activeSocket;
 		select(maxSocket + 1, &readyRead, &readyWrite, NULL, NULL);
 
-		for (int sock = 0; sock <= maxSocket; sock ++)
+		for(int sock = 0; sock <= maxSocket; sock++)
 		{
-			if (FD_ISSET(sock, &readyRead))
+			if(FD_ISSET(sock, &readyRead))
 			{
 				if(sock == sockfd)
 				{
 					connfd = accept(sockfd, NULL, NULL);
 					if (connfd > maxSocket)
-						connfd = maxSocket;
+						maxSocket = connfd;
 					clientSocket[connfd] = next_id++;
 					FD_SET(connfd, &activeSocket);
 					sprintf(outbuf, "server: client %d just arrived\n", next_id -1);
@@ -132,7 +133,7 @@ int main(int argc, char **argv)
 				else
 				{
 					memset(buf, 0, sizeof(buf));
-					int nbyte = recv(sock, buf, 0, sizeof(buf));
+					int nbyte = recv(sock, buf, sizeof(buf), 0);
 					if(nbyte <= 0)
 					{
 						free(clientBuffer[sock]);
