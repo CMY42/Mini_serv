@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 	FD_ZERO(&activeSocket);
 	FD_SET(sockfd, &activeSocket);
 	maxSocket = sockfd;
-	memset(clientBuffer, 0, sizeof(clientBuffer));
+	memset(clientBuffer, '\0', sizeof(clientBuffer));
 
 	while(1)
 	{
@@ -128,11 +128,11 @@ int main(int argc, char **argv)
 					clientSocket[connfd] = next_id++;
 					FD_SET(connfd, &activeSocket);
 					sprintf(outbuf, "server: client %d just arrived\n", next_id -1);
-					sendAll(connfd);
+					sendAll(sockfd);
 				}
 				else
 				{
-					memset(buf, 0, sizeof(buf));
+					memset(buf, '\0', sizeof(buf));
 					int nbyte = recv(sock, buf, sizeof(buf), 0);
 					if(nbyte <= 0)
 					{
